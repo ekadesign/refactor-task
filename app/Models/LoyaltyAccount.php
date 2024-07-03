@@ -8,6 +8,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
+/**
+ * @property int $id
+ * @property bool $active
+ * @property string $email
+ * @property string $phone
+ * @property bool $email_notification
+ * @property bool $phone_notification
+ */
 class LoyaltyAccount extends Model
 {
     protected $table = 'loyalty_account';

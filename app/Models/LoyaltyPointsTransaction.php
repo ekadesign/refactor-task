@@ -4,6 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+/***
+ * @property float $points_amount
+ */
 class LoyaltyPointsTransaction extends Model
 {
     protected $table = 'loyalty_points_transaction';
