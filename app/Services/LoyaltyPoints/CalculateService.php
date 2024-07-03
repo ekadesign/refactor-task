@@ -6,7 +6,7 @@ namespace App\Services\LoyaltyPoints;
 
 use App\Models\LoyaltyPointsRule;
 
-class LoyaltyPointsCalculateService
+class CalculateService
 {
     public function calculatePointsByRule(float $paymentAmount, ?LoyaltyPointsRule $rule): float
     {

@@ -9,21 +9,21 @@ use App\Models\LoyaltyPointsTransaction;
 use App\Services\LoyaltyPoints\Dto\DepositParams;
 use App\Services\LoyaltyPoints\Exceptions\InvalidAccountException;
 use App\Services\LoyaltyPoints\Exceptions\InvalidCancelParamException;
-use App\Services\LoyaltyPoints\LoyaltyPointsService;
+use App\Services\LoyaltyPoints\BalanceService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 
 class LoyaltyPointsController extends Controller
 {
     public function __construct(
-        private LoyaltyPointsService $loyaltyPointsService,
+        private BalanceService $balanceService,
     ) {
     }
 
     public function deposit(DepositRequest $request): JsonResponse
     {
         try {
-            $transaction = $this->loyaltyPointsService->deposit(new DepositParams(
+            $transaction = $this->balanceService->deposit(new DepositParams(
                 accountType: $request->account_type,
                 accountId: $request->account_id,
                 loyaltyPointsRuleAlias: $request->loyalty_points_rule,
@@ -42,7 +42,7 @@ class LoyaltyPointsController extends Controller
     public function cancel(CancelRequest $request): JsonResponse
     {
         try {
-            $this->loyaltyPointsService->cancelByTransactionId(
+            $this->balanceService->cancelByTransactionId(
                 $request->transaction_id,
                 $request->cancellation_reason
             );

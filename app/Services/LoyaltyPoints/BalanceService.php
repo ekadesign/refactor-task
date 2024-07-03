@@ -17,7 +17,7 @@ use InvalidArgumentException;
 use Illuminate\Contracts\Events\Dispatcher as EventDispatcher;
 use Psr\Log\LoggerInterface;
 
-class LoyaltyPointsService
+class BalanceService
 {
     public function __construct(
         private LoggerInterface $logger,
@@ -25,7 +25,7 @@ class LoyaltyPointsService
         private LoyaltyAccountRepository $accountRepository,
         private LoyaltyPointsRuleRepository $ruleRepository,
         private LoyaltyPointsTransactionRepository $transactionRepository,
-        private LoyaltyPointsCalculateService $calculateService,
+        private CalculateService $calculateService,
     ) {
     }
 
