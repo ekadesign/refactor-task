@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 /***
  * @property float $points_amount
+ * @property bool $canceled
+ * @property string $cancellation_reason
  */
 class LoyaltyPointsTransaction extends Model
 {
@@ -19,6 +21,10 @@ class LoyaltyPointsTransaction extends Model
         'payment_id',
         'payment_amount',
         'payment_time',
+    ];
+
+    protected $casts = [
+        'canceled' => 'boolean',
     ];
 
     public static function performPaymentLoyaltyPoints($account_id, $points_rule, $description, $payment_id, $payment_amount, $payment_time)

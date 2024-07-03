@@ -11,6 +11,7 @@ use App\Repositories\LoyaltyAccountRepository;
 use App\Repositories\LoyaltyPointsTransactionRepository;
 use App\Services\LoyaltyPoints\Dto\DepositParams;
 use App\Services\LoyaltyPoints\Exceptions\InvalidAccountException;
+use App\Services\LoyaltyPoints\Exceptions\InvalidCancelParamException;
 use App\ValueObjects\LoyaltyAccountNaturalId;
 use InvalidArgumentException;
 use Illuminate\Contracts\Events\Dispatcher as EventDispatcher;
@@ -60,7 +61,7 @@ class LoyaltyPointsService
             $pointsRule
         );
 
-        $transaction = $this->transactionRepository->create(new LoyaltyPointsTransaction([
+        $transaction = $this->transactionRepository->save(new LoyaltyPointsTransaction([
             'account_id' => $account->id,
             'points_rule' => $pointsRule?->id,
             'points_amount' => $pointsAmount,
@@ -72,6 +73,27 @@ class LoyaltyPointsService
         $this->logger->info($transaction);
 
         $this->eventDispatcher->dispatch(new LoyaltyPointsDeposited($account, $transaction));
+
+        return $transaction;
+    }
+
+    /**
+     * @throws InvalidCancelParamException
+     */
+    public function cancelByTransactionId(int $transactionId, string $reason): LoyaltyPointsTransaction
+    {
+        $transaction = $this->transactionRepository->findById($transactionId);
+        if (!$transaction || $transaction->canceled) {
+            throw new InvalidCancelParamException('Transaction is not found');
+        }
+
+        if (empty($reason)) {
+            throw new InvalidCancelParamException('Cancellation reason is not specified');
+        }
+
+        $transaction->canceled = time();
+        $transaction->cancellation_reason = $reason;
+        $this->transactionRepository->save($transaction);
 
         return $transaction;
     }

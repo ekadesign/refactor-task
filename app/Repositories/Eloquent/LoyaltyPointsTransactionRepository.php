@@ -9,9 +9,17 @@ use App\Repositories\LoyaltyPointsTransactionRepository as Repository;
 
 class LoyaltyPointsTransactionRepository implements Repository
 {
-    public function create(LoyaltyPointsTransaction $transaction): LoyaltyPointsTransaction
+    public function save(LoyaltyPointsTransaction $transaction): LoyaltyPointsTransaction
     {
         $transaction->save();
+
+        return $transaction;
+    }
+
+    public function findById(int $id): ?LoyaltyPointsTransaction
+    {
+        /** @var LoyaltyPointsTransaction|null $transaction */
+        $transaction = LoyaltyPointsTransaction::query()->where('id', '=', $id)->first();
 
         return $transaction;
     }

@@ -8,5 +8,7 @@ use App\Models\LoyaltyPointsTransaction;
 
 interface LoyaltyPointsTransactionRepository
 {
-    public function create(LoyaltyPointsTransaction $transaction): LoyaltyPointsTransaction;
+    public function save(LoyaltyPointsTransaction $transaction): LoyaltyPointsTransaction;
+
+    public function findById(int $id): ?LoyaltyPointsTransaction;
 }

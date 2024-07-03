@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\LoyaltyPoints\CancelRequest;
 use App\Http\Requests\LoyaltyPoints\DepositRequest;
 use App\Models\LoyaltyAccount;
 use App\Models\LoyaltyPointsTransaction;
 use App\Services\LoyaltyPoints\Dto\DepositParams;
 use App\Services\LoyaltyPoints\Exceptions\InvalidAccountException;
+use App\Services\LoyaltyPoints\Exceptions\InvalidCancelParamException;
 use App\Services\LoyaltyPoints\LoyaltyPointsService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
@@ -37,24 +39,18 @@ class LoyaltyPointsController extends Controller
         return response()->json($transaction);
     }
 
-    public function cancel()
+    public function cancel(CancelRequest $request): JsonResponse
     {
-        $data = $_POST;
-
-        $reason = $data['cancellation_reason'];
-
-        if ($reason == '') {
-            return response()->json(['message' => 'Cancellation reason is not specified'], 400);
+        try {
+            $this->loyaltyPointsService->cancelByTransactionId(
+                $request->transaction_id,
+                $request->cancellation_reason
+            );
+        } catch (InvalidCancelParamException $exception) {
+            return response()->json(['message' => $exception->getMessage()], 400);
         }
 
-        if ($transaction = LoyaltyPointsTransaction::where('id', '=', $data['transaction_id'])->where('canceled', '=',
-            0)->first()) {
-            $transaction->canceled = time();
-            $transaction->cancellation_reason = $reason;
-            $transaction->save();
-        } else {
-            return response()->json(['message' => 'Transaction is not found'], 400);
-        }
+        return response()->json();
     }
 
     public function withdraw()
