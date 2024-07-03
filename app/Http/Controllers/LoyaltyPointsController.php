@@ -1,17 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Http\Requests\LoyaltyPoints\CancelRequest;
 use App\Http\Requests\LoyaltyPoints\DepositRequest;
-use App\Models\LoyaltyAccount;
-use App\Models\LoyaltyPointsTransaction;
+use App\Http\Requests\LoyaltyPoints\WithdrawRequest;
 use App\Services\LoyaltyPoints\Dto\DepositParams;
+use App\Services\LoyaltyPoints\Dto\WithdrawParams;
 use App\Services\LoyaltyPoints\Exceptions\InvalidAccountException;
 use App\Services\LoyaltyPoints\Exceptions\InvalidCancelParamException;
 use App\Services\LoyaltyPoints\BalanceService;
+use App\Services\LoyaltyPoints\Exceptions\InvalidPointsAmountException;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Log;
 
 class LoyaltyPointsController extends Controller
 {
@@ -53,41 +55,19 @@ class LoyaltyPointsController extends Controller
         return response()->json();
     }
 
-    public function withdraw()
+    public function withdraw(WithdrawRequest $request): JsonResponse
     {
-        $data = $_POST;
-
-        Log::info('Withdraw loyalty points transaction input: ' . print_r($data, true));
-
-        $type = $data['account_type'];
-        $id = $data['account_id'];
-        if (($type == 'phone' || $type == 'card' || $type == 'email') && $id != '') {
-            if ($account = LoyaltyAccount::where($type, '=', $id)->first()) {
-                if ($account->active) {
-                    if ($data['points_amount'] <= 0) {
-                        Log::info('Wrong loyalty points amount: ' . $data['points_amount']);
-                        return response()->json(['message' => 'Wrong loyalty points amount'], 400);
-                    }
-                    if ($account->getBalance() < $data['points_amount']) {
-                        Log::info('Insufficient funds: ' . $data['points_amount']);
-                        return response()->json(['message' => 'Insufficient funds'], 400);
-                    }
-
-                    $transaction = LoyaltyPointsTransaction::withdrawLoyaltyPoints($account->id, $data['points_amount'],
-                        $data['description']);
-                    Log::info($transaction);
-                    return $transaction;
-                } else {
-                    Log::info('Account is not active: ' . $type . ' ' . $id);
-                    return response()->json(['message' => 'Account is not active'], 400);
-                }
-            } else {
-                Log::info('Account is not found:' . $type . ' ' . $id);
-                return response()->json(['message' => 'Account is not found'], 400);
-            }
-        } else {
-            Log::info('Wrong account parameters');
-            throw new \InvalidArgumentException('Wrong account parameters');
+        try {
+            $transaction = $this->balanceService->withdraw(new WithdrawParams(
+                accountType: $request->account_type,
+                accountId: $request->account_id,
+                pointsAmount: $request->points_amount,
+                description: $request->description,
+            ));
+        } catch (InvalidAccountException|InvalidPointsAmountException $exception) {
+            return response()->json(['message' => $exception->getMessage()], 400);
         }
+
+        return response()->json($transaction);
     }
 }

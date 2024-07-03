@@ -10,8 +10,10 @@ use App\Repositories\Eloquent\LoyaltyPointsRuleRepository;
 use App\Repositories\LoyaltyAccountRepository;
 use App\Repositories\LoyaltyPointsTransactionRepository;
 use App\Services\LoyaltyPoints\Dto\DepositParams;
+use App\Services\LoyaltyPoints\Dto\WithdrawParams;
 use App\Services\LoyaltyPoints\Exceptions\InvalidAccountException;
 use App\Services\LoyaltyPoints\Exceptions\InvalidCancelParamException;
+use App\Services\LoyaltyPoints\Exceptions\InvalidPointsAmountException;
 use App\ValueObjects\LoyaltyAccountNaturalId;
 use InvalidArgumentException;
 use Illuminate\Contracts\Events\Dispatcher as EventDispatcher;
@@ -94,6 +96,62 @@ class BalanceService
         $transaction->canceled = time();
         $transaction->cancellation_reason = $reason;
         $this->transactionRepository->save($transaction);
+
+        return $transaction;
+    }
+
+    /**
+     * @throws InvalidAccountException
+     * @throws InvalidPointsAmountException
+     */
+    public function withdraw(WithdrawParams $withdrawParams): LoyaltyPointsTransaction
+    {
+        $this->logger->info('Withdraw loyalty points transaction input: ' . print_r($withdrawParams, true));
+
+        if (!LoyaltyAccountNaturalId::isValidaType($withdrawParams->getAccountType())) {
+            $this->logger->info('Wrong account parameters');
+            throw new InvalidArgumentException('Wrong account parameters');
+        }
+
+        $account = $this->accountRepository->findByNaturalId(new LoyaltyAccountNaturalId(
+            $withdrawParams->getAccountType(),
+            $withdrawParams->getAccountId()
+        ));
+        if (!$account) {
+            $this->logger->info(\sprintf(
+                'Account is not found: %s %s',
+                $withdrawParams->getAccountType(),
+                $withdrawParams->getAccountId()
+            ));
+            throw new InvalidAccountException('Account is not found');
+        }
+
+        if (!$account->active) {
+            $this->logger->info(\sprintf(
+                'Account is not active: %s %s',
+                $withdrawParams->getAccountType(),
+                $withdrawParams->getAccountId()
+            ));
+            throw new InvalidAccountException('Account is not active');
+        }
+
+        if ($withdrawParams->getPointsAmount() <= 0) {
+            $this->logger->info('Wrong loyalty points amount: ' . $withdrawParams->getPointsAmount());
+            throw new InvalidPointsAmountException('Wrong loyalty points amount');
+        }
+
+        if ($account->getBalance() < $withdrawParams->getPointsAmount()) {
+            $this->logger->info('Insufficient funds: ' . $withdrawParams->getPointsAmount());
+            throw new InvalidPointsAmountException('Insufficient funds');
+        }
+
+        $transaction = $this->transactionRepository->save(new LoyaltyPointsTransaction([
+            'account_id' => $account->id,
+            'points_rule' => 'withdraw',
+            'points_amount' => -$withdrawParams->getPointsAmount(),
+            'description' => $withdrawParams->getDescription(),
+        ]));
+        $this->logger->info($transaction);
 
         return $transaction;
     }
