@@ -2,6 +2,12 @@
 
 namespace App\Providers;
 
+use App\Repositories\LoyaltyAccountRepository;
+use App\Repositories\LoyaltyAccountRepositoryInterface;
+use App\Repositories\LoyaltyPointsTransactionRepository;
+use App\Repositories\LoyaltyPointsTransactionRepositoryInterface;
+use App\Services\LoyaltyPointsServiceInterface;
+use App\Services\LoyaltyPointsService;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -13,7 +19,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        $this->app->bind(LoyaltyAccountRepositoryInterface::class, LoyaltyAccountRepository::class);
+        $this->app->bind(LoyaltyPointsTransactionRepositoryInterface::class, LoyaltyPointsTransactionRepository::class);
+        $this->app->bind(LoyaltyPointsServiceInterface::class, LoyaltyPointsService::class);
     }
 
     /**
