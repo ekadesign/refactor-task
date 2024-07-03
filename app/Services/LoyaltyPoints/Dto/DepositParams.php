@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Services\LoyaltyPoints\Dto;
 
-use App\ValueObjects\LoyaltyAccountNaturalId;
-
 class DepositParams
 {
     public function __construct(
