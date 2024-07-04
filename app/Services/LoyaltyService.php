@@ -2,6 +2,9 @@
 
 namespace App\Services;
 
+use App\DataTransfers\Loyalty\CancelDTO;
+use App\DataTransfers\Loyalty\DepositDTO;
+use App\DataTransfers\Loyalty\WithdrawDTO;
 use App\Mail\LoyaltyPointsReceived;
 use App\Models\LoyaltyAccount;
 use App\Models\LoyaltyPointsTransaction;
@@ -10,7 +13,7 @@ use Illuminate\Support\Facades\Mail;
 
 class LoyaltyService
 {
-    public function deposit(array $data)
+    public function deposit(DepositDTO $data)
     {
         Log::info('Deposit transaction input: ' . print_r($data, true));
 
@@ -34,7 +37,7 @@ class LoyaltyService
         return $transaction;
     }
 
-    public function cancel(array $data)
+    public function cancel(CancelDTO $data)
     {
         $reason = $data['cancellation_reason'];
         if (empty($reason)) {
@@ -50,7 +53,7 @@ class LoyaltyService
         $transaction->save();
     }
 
-    public function withdraw(array $data)
+    public function withdraw(WithdrawDTO $data)
     {
         Log::info('Withdraw loyalty points transaction input: ' . print_r($data, true));
 
