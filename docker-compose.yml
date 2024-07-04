@@ -13,3 +13,4 @@ services:
         working_dir: /var/www
         ports:
             - "8000:8000"
+        command: sh -c "composer install && php artisan serve --host 0.0.0.0"
