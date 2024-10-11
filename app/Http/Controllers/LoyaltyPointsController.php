@@ -45,20 +45,17 @@ class LoyaltyPointsController extends Controller
         }
     }
 
-    public function cancel(CancelLoyaltyPointsRequest $request)
+    public function cancel(CancelLoyaltyPointsRequest $request): LoyaltyPointsTransactionResource|JsonResponse
     {
         $cancelLoyaltyPointsDto = new CancelLoyaltyPointsDto($request->validated());
 
-        if ($reason == '') {
-            return response()->json(['message' => 'Cancellation reason is not specified'], 400);
-        }
-
-        if ($transaction = LoyaltyPointsTransaction::where('id', '=', $data['transaction_id'])->where('canceled', '=', 0)->first()) {
-            $transaction->canceled = time();
-            $transaction->cancellation_reason = $reason;
-            $transaction->save();
-        } else {
-            return response()->json(['message' => 'Transaction is not found'], 400);
+        try {
+            return $this->loyaltyPointsService->rollbackLoyaltyPoints($cancelLoyaltyPointsDto);
+        } catch (ModelNotFoundException) {
+            return response()->json(['message' => 'Transaction is not found'], Response::HTTP_NOT_FOUND);
+        } catch (\Throwable $e) {
+            Log::error($e->getMessage());
+            return response()->json(['message' => 'Internal server error'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 

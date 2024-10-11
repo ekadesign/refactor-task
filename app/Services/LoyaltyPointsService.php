@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\DTO\CancelLoyaltyPointsDto;
 use App\DTO\PaymentLoyaltyPointsDto;
 use App\Events\PaymentLoyaltyPointsNotifications;
 use App\Exceptions\AccountNotActiveException;
@@ -41,5 +42,10 @@ class LoyaltyPointsService
         event(new PaymentLoyaltyPointsNotifications($account, $transaction));
 
         return new LoyaltyPointsTransactionResource($transaction);
+    }
+
+    public function rollbackLoyaltyPoints(CancelLoyaltyPointsDto $cancelDto): LoyaltyPointsTransactionResource
+    {
+        return new LoyaltyPointsTransactionResource($this->loyaltyPointsRepo->cancelLoyaltyPoints($cancelDto));
     }
 }
