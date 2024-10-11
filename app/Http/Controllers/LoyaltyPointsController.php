@@ -9,6 +9,7 @@ use App\Models\LoyaltyAccount;
 use App\Models\LoyaltyPointsTransaction;
 use App\DTO\CancelLoyaltyPointsDto;
 use App\DTO\PaymentLoyaltyPointsDto;
+use App\DTO\WithdrawLoyaltyPointsDto;
 use App\Exceptions\AccountNotActiveException;
 use App\Http\Requests\CancelLoyaltyPointsRequest;
 use App\Http\Requests\PaymentLoyaltyPointsRequest;
@@ -62,7 +63,7 @@ class LoyaltyPointsController extends Controller
 
     public function withdraw(WithdrawLoyaltyPointsRequest $request)
     {
-        $data = $_POST;
+        $withdrawLoyaltyPointsDto = new WithdrawLoyaltyPointsDto($request->validated());
 
         Log::info('Withdraw loyalty points transaction input: ' . print_r($data, true));
 
