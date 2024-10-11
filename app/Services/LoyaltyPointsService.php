@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\DTO\CancelLoyaltyPointsDto;
 use App\DTO\PaymentLoyaltyPointsDto;
+use App\DTO\WithdrawLoyaltyPointsDto;
 use App\Events\PaymentLoyaltyPointsNotifications;
 use App\Exceptions\AccountNotActiveException;
 use App\Http\Resources\LoyaltyPointsTransactionResource;
@@ -47,5 +48,27 @@ class LoyaltyPointsService
     public function rollbackLoyaltyPoints(CancelLoyaltyPointsDto $cancelDto): LoyaltyPointsTransactionResource
     {
         return new LoyaltyPointsTransactionResource($this->loyaltyPointsRepo->cancelLoyaltyPoints($cancelDto));
+    }
+
+    /**
+     * @throws AccountNotActiveException
+     */
+    public function withdrawLoyaltyPoints(WithdrawLoyaltyPointsDto $withdrawLoyaltyPointsDto): LoyaltyPointsTransactionResource
+    {
+        /** @var LoyaltyAccount $account */
+        $account = $this->loyaltyPointsRepo->getLoyaltyAccount(
+            $withdrawLoyaltyPointsDto->getAccountType(),
+            $withdrawLoyaltyPointsDto->getId()
+        );
+
+        if (!$account->isActive()) {
+            throw new AccountNotActiveException();
+        }
+
+        /** @var LoyaltyPointsTransaction $transaction */
+        $transaction = $this->loyaltyPointsRepo->withdrawLoyaltyPoints($withdrawLoyaltyPointsDto);
+        Log::info('Transaction', $withdrawLoyaltyPointsDto->toArray());
+
+        return new LoyaltyPointsTransactionResource($transaction);
     }
 }

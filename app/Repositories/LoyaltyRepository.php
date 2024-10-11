@@ -6,6 +6,7 @@ namespace App\Repositories;
 
 use App\DTO\CancelLoyaltyPointsDto;
 use App\DTO\PaymentLoyaltyPointsDto;
+use App\DTO\WithdrawLoyaltyPointsDto;
 use App\Models\LoyaltyAccount;
 use App\Models\LoyaltyPointsTransaction;
 use App\Repositories\Interfaces\LoyaltyRepositoryInterface;
@@ -46,5 +47,10 @@ class LoyaltyRepository implements LoyaltyRepositoryInterface
         }
 
         return $updated;
+    }
+
+    public function withdrawLoyaltyPoints(WithdrawLoyaltyPointsDto $withdrawDto): Model|Builder
+    {
+        return LoyaltyPointsTransaction::withdrawLoyaltyPoints($withdrawDto);
     }
 }

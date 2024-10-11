@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Mail\LoyaltyPointsReceived;
-use App\Models\LoyaltyAccount;
-use App\Models\LoyaltyPointsTransaction;
 use App\DTO\CancelLoyaltyPointsDto;
 use App\DTO\PaymentLoyaltyPointsDto;
 use App\DTO\WithdrawLoyaltyPointsDto;
@@ -61,40 +58,23 @@ class LoyaltyPointsController extends Controller
         }
     }
 
-    public function withdraw(WithdrawLoyaltyPointsRequest $request)
+    public function withdraw(WithdrawLoyaltyPointsRequest $request): LoyaltyPointsTransactionResource|JsonResponse
     {
         $withdrawLoyaltyPointsDto = new WithdrawLoyaltyPointsDto($request->validated());
 
         Log::info('Withdraw loyalty points transaction input: ' . print_r($data, true));
 
-        $type = $data['account_type'];
-        $id = $data['account_id'];
-        if (($type == 'phone' || $type == 'card' || $type == 'email') && $id != '') {
-            if ($account = LoyaltyAccount::where($type, '=', $id)->first()) {
-                if ($account->active) {
-                    if ($data['points_amount'] <= 0) {
-                        Log::info('Wrong loyalty points amount: ' . $data['points_amount']);
-                        return response()->json(['message' => 'Wrong loyalty points amount'], 400);
-                    }
-                    if ($account->getBalance() < $data['points_amount']) {
-                        Log::info('Insufficient funds: ' . $data['points_amount']);
-                        return response()->json(['message' => 'Insufficient funds'], 400);
-                    }
-
-                    $transaction = LoyaltyPointsTransaction::withdrawLoyaltyPoints($account->id, $data['points_amount'], $data['description']);
-                    Log::info($transaction);
-                    return $transaction;
-                } else {
-                    Log::info('Account is not active: ' . $type . ' ' . $id);
-                    return response()->json(['message' => 'Account is not active'], 400);
-                }
-            } else {
-                Log::info('Account is not found:' . $type . ' ' . $id);
-                return response()->json(['message' => 'Account is not found'], 400);
-            }
-        } else {
-            Log::info('Wrong account parameters');
-            throw new \InvalidArgumentException('Wrong account parameters');
+        try {
+            return $this->loyaltyPointsService->withdrawLoyaltyPoints($withdrawLoyaltyPointsDto);
+        } catch (ModelNotFoundException) {
+            Log::info('Account is not found:' . $withdrawLoyaltyPointsDto->getAccountType() . ' ' . $withdrawLoyaltyPointsDto->getId());
+            return response()->json(['message' => 'Account is not found'], Response::HTTP_NOT_FOUND);
+        } catch (AccountNotActiveException $e) {
+            Log::info('Account is not active: ' . $withdrawLoyaltyPointsDto->getAccountType() . ' ' . $withdrawLoyaltyPointsDto->getId());
+            return response()->json(['message' => $e->getMessage()], $e->getCode());
+        } catch (\Throwable $e) {
+            Log::error($e->getMessage());
+            return response()->json(['message' => 'Internal server error'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }
