@@ -9,6 +9,7 @@ use App\Models\LoyaltyAccount;
 use App\Models\LoyaltyPointsTransaction;
 use App\DTO\PaymentLoyaltyPointsDto;
 use App\Exceptions\AccountNotActiveException;
+use App\Http\Requests\CancelLoyaltyPointsRequest;
 use App\Http\Requests\PaymentLoyaltyPointsRequest;
 use App\Http\Resources\LoyaltyPointsTransactionResource;
 use App\Services\LoyaltyPointsService;
@@ -43,7 +44,7 @@ class LoyaltyPointsController extends Controller
         }
     }
 
-    public function cancel()
+    public function cancel(CancelLoyaltyPointsRequest $request)
     {
         $data = $_POST;
 
