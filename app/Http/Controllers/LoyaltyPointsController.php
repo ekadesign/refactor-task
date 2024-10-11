@@ -7,12 +7,13 @@ namespace App\Http\Controllers;
 use App\Mail\LoyaltyPointsReceived;
 use App\Models\LoyaltyAccount;
 use App\Models\LoyaltyPointsTransaction;
+use App\Http\Requests\PaymentLoyaltyPointsRequest;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class LoyaltyPointsController extends Controller
 {
-    public function deposit()
+    public function deposit(PaymentLoyaltyPointsRequest $request)
     {
         $data = $_POST;
 
