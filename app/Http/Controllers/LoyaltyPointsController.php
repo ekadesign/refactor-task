@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Mail\LoyaltyPointsReceived;
 use App\Models\LoyaltyAccount;
 use App\Models\LoyaltyPointsTransaction;
+use App\DTO\CancelLoyaltyPointsDto;
 use App\DTO\PaymentLoyaltyPointsDto;
 use App\Exceptions\AccountNotActiveException;
 use App\Http\Requests\CancelLoyaltyPointsRequest;
@@ -46,9 +47,7 @@ class LoyaltyPointsController extends Controller
 
     public function cancel(CancelLoyaltyPointsRequest $request)
     {
-        $data = $_POST;
-
-        $reason = $data['cancellation_reason'];
+        $cancelLoyaltyPointsDto = new CancelLoyaltyPointsDto($request->validated());
 
         if ($reason == '') {
             return response()->json(['message' => 'Cancellation reason is not specified'], 400);
