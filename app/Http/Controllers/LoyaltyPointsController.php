@@ -62,7 +62,7 @@ class LoyaltyPointsController extends Controller
     {
         $withdrawLoyaltyPointsDto = new WithdrawLoyaltyPointsDto($request->validated());
 
-        Log::info('Withdraw loyalty points transaction input: ' . print_r($data, true));
+        Log::info('Withdraw loyalty points transaction input: ' . print_r($withdrawLoyaltyPointsDto->toArray(), true));
 
         try {
             return $this->loyaltyPointsService->withdrawLoyaltyPoints($withdrawLoyaltyPointsDto);
