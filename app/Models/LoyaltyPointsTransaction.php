@@ -48,4 +48,9 @@ class LoyaltyPointsTransaction extends Model
             'description' => $description,
         ]);
     }
+
+    public function getPointsAmount(): float
+    {
+        return $this->points_amount;
+    }
 }
