@@ -12,6 +12,7 @@ use App\DTO\PaymentLoyaltyPointsDto;
 use App\Exceptions\AccountNotActiveException;
 use App\Http\Requests\CancelLoyaltyPointsRequest;
 use App\Http\Requests\PaymentLoyaltyPointsRequest;
+use App\Http\Requests\WithdrawLoyaltyPointsRequest;
 use App\Http\Resources\LoyaltyPointsTransactionResource;
 use App\Services\LoyaltyPointsService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -59,7 +60,7 @@ class LoyaltyPointsController extends Controller
         }
     }
 
-    public function withdraw()
+    public function withdraw(WithdrawLoyaltyPointsRequest $request)
     {
         $data = $_POST;
 
