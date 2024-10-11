@@ -27,7 +27,7 @@ class LoyaltyPointsController extends Controller
     {
         $paymentLoyaltyPointsDto = new PaymentLoyaltyPointsDto($request->validated());
 
-        Log::info('Deposit transaction input: ' . print_r($data, true));
+        Log::info('Deposit transaction input: ' . print_r($paymentLoyaltyPointsDto->toArray(), true));
 
         try {
             return $this->loyaltyPointsService->addLoyaltyPoints($paymentLoyaltyPointsDto);
