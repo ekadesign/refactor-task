@@ -9,11 +9,16 @@ use App\Models\LoyaltyAccount;
 use App\Models\LoyaltyPointsTransaction;
 use App\DTO\PaymentLoyaltyPointsDto;
 use App\Http\Requests\PaymentLoyaltyPointsRequest;
+use App\Services\LoyaltyPointsService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class LoyaltyPointsController extends Controller
 {
+    public function __construct(
+        private LoyaltyPointsService $loyaltyPointsService
+    ) {}
+
     public function deposit(PaymentLoyaltyPointsRequest $request)
     {
         $paymentLoyaltyPointsDto = new PaymentLoyaltyPointsDto($request->validated());
